@@ -219,3 +219,4 @@ __marimo__/
 
 # Local input data and raw videos
 data/
+.DS_Store

@@ -5,6 +5,7 @@ VIDEO_PATH = "data/raw_videos/road.mp4" # Store the video path in one variable s
 DISPLAY_WIDTH = 800 # Use a smaller display width so large video frames fit on screen
 SMOOTHING_PREVIOUS_WEIGHT = 0.8 # Weight for the previous frame's lane estimate during temporal smoothing
 SMOOTHING_CURRENT_WEIGHT = 0.2 # Weight for the current frame's raw lane estimate during temporal smoothing
+LANE_DEPARTURE_THRESHOLD = 100 # Pixel offset from lane center before showing a lane-departure warning
 
 
 def resize_for_display(image):
@@ -40,6 +41,48 @@ def smooth_lane_value(previous_value, current_value):
     if previous_value is None:
         return current_value
     return (SMOOTHING_PREVIOUS_WEIGHT * previous_value) + (SMOOTHING_CURRENT_WEIGHT * current_value)
+
+
+def draw_lane_center_visualization(image, left_lane_average, right_lane_average, width, height):
+    # Visualize the lane center at a fixed y-position so the offset is measured consistently.
+    left_slope, left_intercept = left_lane_average
+    right_slope, right_intercept = right_lane_average
+    center_y = int(height * 0.75)
+
+    # Rearrange y = mx + b into x = (y - b) / m for both final smoothed lane equations.
+    left_x_at_center_y = (center_y - left_intercept) / left_slope
+    right_x_at_center_y = (center_y - right_intercept) / right_slope
+    lane_center_x = (left_x_at_center_y + right_x_at_center_y) / 2
+    car_center_x = width / 2
+    offset_pixels = car_center_x - lane_center_x
+
+    cv2.line(image, (0, center_y), (width, center_y), (255, 255, 255), 2)
+    cv2.line(image, (int(lane_center_x), 0), (int(lane_center_x), height), (0, 255, 0), 3)
+    cv2.line(image, (int(car_center_x), 0), (int(car_center_x), height), (255, 0, 0), 3)
+
+    if offset_pixels > LANE_DEPARTURE_THRESHOLD:
+        lane_status = "Drifting Right"
+    elif offset_pixels < -LANE_DEPARTURE_THRESHOLD:
+        lane_status = "Drifting Left"
+    else:
+        lane_status = "Centered"
+
+    cv2.putText(
+        image,
+        lane_status,
+        (40, 80),
+        cv2.FONT_HERSHEY_SIMPLEX,
+        1.2,
+        (0, 255, 255),
+        3,
+    )
+
+    print(f"center_y: {center_y}")
+    print(f"left_x_at_center_y: {left_x_at_center_y}")
+    print(f"right_x_at_center_y: {right_x_at_center_y}")
+    print(f"lane_center_x: {lane_center_x}")
+    print(f"car_center_x: {car_center_x}")
+    print(f"offset_pixels: {offset_pixels}")
 
 
 cap = cv2.VideoCapture(VIDEO_PATH) # Open the video file
@@ -108,6 +151,8 @@ while True: # Loop to read and display video frames
 
     left_fit = [] # Store (slope, intercept) pairs for left-lane candidate segments
     right_fit = [] # Store (slope, intercept) pairs for right-lane candidate segments
+    left_lane_points = None # Store final smoothed/reused left-lane endpoints for center calculation
+    right_lane_points = None # Store final smoothed/reused right-lane endpoints for center calculation
 
     for x1, y1, x2, y2 in left_lines:
         slope = (y2 - y1) / (x2 - x1) # Convert the segment endpoints into y = mx + b form
@@ -178,6 +223,15 @@ while True: # Loop to read and display video frames
             print(f"Right lane endpoints: {right_lane_points}")
         else:
             print("Right average: no lane candidates and no previous lane to reuse")
+
+    if left_lane_points is not None and right_lane_points is not None:
+        draw_lane_center_visualization(
+            lane_overlay,
+            (previous_left_slope, previous_left_intercept),
+            (previous_right_slope, previous_right_intercept),
+            width,
+            height,
+        )
     
     cv2.polylines(frame, [roi_points], isClosed=True, color=(0, 0, 0), thickness=8) # Draw a thick black outline first so the ROI has contrast
     cv2.polylines(frame, [roi_points], isClosed=True, color=(0, 255, 255), thickness=4) # Draw a bright yellow outline on top for visibility
