@@ -1,6 +1,7 @@
 import cv2 # OpenCV library for video processing
 
 from lane_detection import process_lane_detection
+from object_detection import process_object_detection
 
 VIDEO_PATH = "data/raw_videos/road.mp4" # Store the video path in one variable so it is easy to check and update
 
@@ -17,7 +18,10 @@ while True: # Loop to read and display video frames
         break
 
     lane_overlay = process_lane_detection(frame)
+    object_overlay = process_object_detection(lane_overlay)
+
     cv2.imshow("Lane Overlay", lane_overlay) # Display averaged lane endpoints directly on the original road frame
+    cv2.imshow("Object Detection", object_overlay) # Display YOLO vehicle and pedestrian detections for visual inspection
 
     if cv2.waitKey(1) & 0xFF == ord("q"): # Wait for 1 ms and check if the 'q' key is pressed to exit the loop
         break
