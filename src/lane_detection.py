@@ -50,7 +50,7 @@ def _smooth_lane_value(previous_value, current_value):
 
 
 def _draw_lane_center_visualization(image, left_lane_average, right_lane_average, width, height):
-    # Visualize the lane center at a fixed y-position so the offset is measured consistently.
+    # Visualize the lane center at a fixed y-position and return the values other modules need.
     left_slope, left_intercept = left_lane_average
     right_slope, right_intercept = right_lane_average
     center_y = int(height * 0.75)
@@ -90,8 +90,16 @@ def _draw_lane_center_visualization(image, left_lane_average, right_lane_average
     print(f"car_center_x: {car_center_x}")
     print(f"offset_pixels: {offset_pixels}")
 
+    return {
+        "center_y": center_y,
+        "lane_center_x": lane_center_x,
+        "car_center_x": car_center_x,
+        "offset_pixels": offset_pixels,
+        "lane_status": lane_status,
+    }
 
-def process_lane_detection(frame):
+
+def process_lane_detection(frame, return_info=False):
     # Run the full lane-detection pipeline for one frame and return the final lane overlay frame.
     global _previous_left_slope
     global _previous_left_intercept
@@ -151,6 +159,7 @@ def process_lane_detection(frame):
     right_fit = [] # Store (slope, intercept) pairs for right-lane candidate segments
     left_lane_points = None # Store final smoothed/reused left-lane endpoints for center calculation
     right_lane_points = None # Store final smoothed/reused right-lane endpoints for center calculation
+    lane_info = None # Store lane-center metadata for downstream ADAS logic when both lanes are available
 
     for x1, y1, x2, y2 in left_lines:
         slope = (y2 - y1) / (x2 - x1) # Convert the segment endpoints into y = mx + b form
@@ -223,7 +232,7 @@ def process_lane_detection(frame):
             print("Right average: no lane candidates and no previous lane to reuse")
 
     if left_lane_points is not None and right_lane_points is not None:
-        _draw_lane_center_visualization(
+        lane_info = _draw_lane_center_visualization(
             lane_overlay,
             (_previous_left_slope, _previous_left_intercept),
             (_previous_right_slope, _previous_right_intercept),
@@ -240,5 +249,8 @@ def process_lane_detection(frame):
     # Display the averaged-lane debug image in its own window.
     # This keeps the averaged result separate from the raw frame so we can verify the line positions before overlaying them later.
     cv2.imshow("Average Lanes", _resize_for_display(average_lanes))
+
+    if return_info:
+        return lane_overlay, lane_info
 
     return lane_overlay
