@@ -19,6 +19,5 @@
 - [x] Pedestrian detection
 
 ## Phase 4 - Driver Assistance
-- [ ] Collision warnings
-- [ ] Lane departure warnings
-- [ ] Driver safety score
+- [x] Collision warnings
+- [x] Lane departure warnings
