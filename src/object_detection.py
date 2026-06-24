@@ -92,6 +92,15 @@ def _estimate_path_status(object_center_x, lane_info):
     return "outside_path"
 
 
+def _get_lane_center_offset(object_center_x, lane_info):
+    # Temporary debug helper for printing how far a detected object is from the lane center.
+    if lane_info is None:
+        return None, None
+
+    lane_center_x = lane_info["lane_center_x"]
+    return lane_center_x, abs(object_center_x - lane_center_x)
+
+
 def _get_collision_warning(class_name, distance_level, path_status):
     # Combine class, visual closeness, and lane-relative position into a first-pass warning rule.
     if path_status == "unknown":
@@ -174,6 +183,16 @@ def process_object_detection(frame, lane_info=None):
         _draw_detection_label(detection_overlay, label, x1, y1, color)
 
         if warning is not None:
+            lane_center_x, absolute_offset = _get_lane_center_offset(object_center_x, lane_info)
+            print(
+                "Warning debug: "
+                f"lane_center_x={lane_center_x}, "
+                f"object_center_x={object_center_x}, "
+                f"absolute_offset={absolute_offset}, "
+                f"path_status={path_status}, "
+                f"distance_level={distance_level}, "
+                f"warning={warning}"
+            )
             active_warning = _choose_highest_priority_warning(active_warning, warning)
             cv2.rectangle(detection_overlay, (x1, y1), (x2, y2), (0, 0, 255), 4)
 
