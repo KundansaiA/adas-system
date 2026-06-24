@@ -1,6 +1,6 @@
 # ADAS Computer Vision System
 
-An educational Advanced Driver Assistance System (ADAS) project built with Python and OpenCV. The goal is to process road footage, detect lane boundaries, and grow the system into a modular driver-assistance pipeline with vehicle detection, pedestrian detection, and collision-risk warnings.
+An educational Advanced Driver Assistance System (ADAS) project built with Python and OpenCV. The goal is to process road footage, detect lane boundaries, and grow the system into a modular driver assistance pipeline with vehicle detection, pedestrian detection, and collision risk warnings.
 
 This project is focused on computer vision understanding and production-style software organization. It is not a self-driving car project and does not control any vehicle hardware.
 
