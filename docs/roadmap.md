@@ -4,19 +4,19 @@
 - [x] Create GitHub repository
 - [x] Create project structure
 - [x] Install OpenCV
-- [ ] Create virtual environment
-- [ ] Load and display video
+- [x] Create virtual environment
+- [x] Load and display video
 
 ## Phase 2 - Computer Vision
-- [ ] Understand image frames
-- [ ] Grayscale conversion
-- [ ] Edge detection
-- [ ] Lane detection
+- [x] Understand image frames
+- [x] Grayscale conversion
+- [x] Edge detection
+- [x] Lane detection
 
 ## Phase 3 - Object Detection
-- [ ] YOLO integration
-- [ ] Vehicle detection
-- [ ] Pedestrian detection
+- [x] YOLO integration
+- [x] Vehicle detection
+- [x] Pedestrian detection
 
 ## Phase 4 - Driver Assistance
 - [ ] Collision warnings
