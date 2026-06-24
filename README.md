@@ -40,8 +40,10 @@ ADAS systems combine perception, decision logic, and user-facing warnings. This 
 ## Tech Stack
 
 - Python
-- OpenCV
-- NumPy
+- OpenCV for video processing, lane detection, and visualization
+- NumPy for frame and geometry calculations
+- Ultralytics YOLOv8 for pretrained vehicle and pedestrian detection
+- Git and GitHub for version control and project hosting
 
 ## Project Structure
 
@@ -124,7 +126,7 @@ python -m venv .venv
 ### 3. Install dependencies
 
 ```bash
-pip install opencv-python numpy
+pip install -r requirements.txt
 ```
 
 ### 4. Add input video
